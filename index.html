@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Graph CSV</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+</head>
+
+<body>
+    <h1></h1>
+    <canvas id="chart" width="750" height="350"></canvas>
+    <script>
+        const xaxis = [];
+        const yaxis = [];
+
+        draw();
+        async function draw() {
+            await getData();
+            const ctx = document.getElementById("chart").getContext("2d");
+
+            const myChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: xaxis,
+                    datasets: [{
+                        label: "Combined Land-Surface Air and Sea-Surface Water Temperature NASA",
+                        data: yaxis,
+                        // fill: false,
+                        backgroundColor: "rgba(255, 99, 132, 0.2)",
+                        borderColor: "rgba(255, 99, 132, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                // Include a dollar sign in the ticks
+                                callback: function(value, index, values) {
+                                    return value + "°C";
+                                }
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // Data from: https://data.giss.nasa.gov/gistemp/
+        // Mean from: https://earthobservatory.nasa.gov/world-of-change/DecadalTemp
+
+        async function getData() {
+            const response = await fetch("data.csv");
+            const data = await response.text();
+            // console.log(data);
+            const table = data.split("\n").slice(1);
+            table.forEach(row => {
+                const columns = row.split(",");
+                const year = columns[0];
+                xaxis.push(year);
+                const temp = columns[1];
+                yaxis.push(parseFloat(temp) + 14);
+                console.log(year, temp);
+            });
+        }
+    </script>
+</body>
+
+</html>
